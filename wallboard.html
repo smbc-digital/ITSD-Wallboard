@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amazon Connect Wallboard</title>
+    <link rel="stylesheet" href="wallboard.css">
+</head>
+
+<body>
+    <div class="header">
+        <h1>SMBC IT Service Desk</h1>
+    </div>
+    <div class="wallboard">
+        <div class="custom-info" id="customInformation">
+        </div>
+        <div class="metric metric--highlight">
+            <h2>Calls in Queue</h2>
+            <p id="callsInQueue">-</p>
+        </div>
+        <div class="metric metric--highlight">
+            <h2>Calls Abandoned</h2>
+            <p id="callsAbandoned">-</p>
+        </div>
+        <div class="metric metric--highlight">
+            <h2>Longest Wait Time</h2>
+            <p id="longestWaitTime">-</p>
+        </div>
+        <div class="metric">
+            <h2>Calls Handled</h2>
+            <p id="callsHandled">-</p>
+        </div>
+
+        <div class="metric">
+            <h2>Overall Agent Answer Rate</h2>
+            <p id="agentAnswerRate">-</p>
+        </div>
+        <div class="metric">
+            <h2>Average Contact Duration</h2>
+            <p id="averageContactDuration">-</p>
+        </div>
+        <div class="metric agent-statuses">
+            <h2>Agent Statuses</h2>
+            <ul id="agentStatuses"></ul>
+        </div>
+    </div>
+    <div id="countdown"></div>
+
+    <script src="wallboard.js"></script>
+</body>
+</html>
