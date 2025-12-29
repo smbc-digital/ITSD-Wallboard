@@ -3,7 +3,7 @@ const API_CONFIG = {
     timeout: 10000
 };
 const DEBUG_MODE = false;
-const updateInterval = 8000;
+const updateInterval = 10;
 const callAlertThreshold = 10;
 const callWarnThreshold = 5;
 const waitTimeAlertThreshold = 300000; // 5 minutes in milliseconds
