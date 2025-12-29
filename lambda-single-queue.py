@@ -34,29 +34,35 @@ def lambda_handler(event, context):
 
         # Get required parameters from environment variables
         instance_id = os.environ.get('ConnectInstanceId')
-        # queue_arn = os.environ.get('QueueArn')
+        queue_arns = os.environ.get('QueueArn')
 
-        queue_arns_str = os.environ.get('QueueArns')
+        queue_arns.split(",")
+
         
         if not instance_id:
             raise ValueError("ConnectInstanceId environment variable is required")
-        
-        if not queue_arns_str:
+        if not queue_arn:
             raise ValueError("QueueArn environment variable is required")
             
         # Extract queue ID from ARN
-        queues = extract_queue_ids_from_arns(queue_arns_str)
-        if not queues:
-            raise ValueError("Could not extract queue IDs from QueueArns")            
+        queue_id = extract_queue_id_from_arn(queue_arn)
 
+
+        if not queue_id:
+            raise ValueError("Could not extract queue ID from QueueArn")
+            
         # Extract instance ARN from queue ARN
-        instance_arn = extract_instance_arn_from_queue_arn(queue_arns_str.split(',')[0].strip())
+        instance_arn = extract_instance_arn_from_queue_arn(queue_arn)
         if not instance_arn:
             raise ValueError("Could not extract instance ARN from QueueArn")
+            
+        queues = [queue_id]
         
         print("Instance ID:", instance_id)
         print("Instance ARN:", instance_arn)
-        print("Queue IDs:", queues)
+        print("Queue ID:", queue_id)
+        print("Queue ID:", vip_queue_id)
+        print("Queues:", queues)
 
         connect = boto3.client('connect')
 
@@ -143,9 +149,7 @@ def lambda_handler(event, context):
 
         # Get the agent statuses
         agent_statuses = []
-        contacts = []
-        
-
+        users = []
         try:
             response = connect.get_current_user_data(
                 InstanceId=instance_id,
@@ -154,25 +158,41 @@ def lambda_handler(event, context):
                 },
                 MaxResults=100
             )
-            # https://docs.aws.amazon.com/connect/latest/APIReference/API_GetCurrentUserData.html
+
             print("Current User Data:", response)
             
-            for user in response.get("UserDataList", []):
-                status = user.get("Status", {}).get("StatusName")
-                if status:
-                    agent_statuses.append(status)
+            for userData in response.get("UserDataList", []):
+                user = userData.get("User", {})
+                userResponse = connect.describe_user(
+                    InstanceId=instance_id,
+                    UserId=user.get("Id", "")
+                )
+
+                userStatus = userData.get("Status", {}).get("StatusName")
+                users.append({
+                    "Arn": user.get("Arn", ""),
+                    "Id": user.get("Id", ""),
+                    "OnContacts": len(user.get("Contacts", [])) > 0,
+                    "Status": userStatus,
+                    "FirstName": userResponse.get("User", {}).get("IdentityInfo").get("FirstName", ""),
+                    "LastName": userResponse.get("User", {}).get("IdentityInfo").get("LastName", "")
+                })
+                
+                if userStatus:
+                    agent_statuses.append(userStatus)
                     
         except Exception as e:
             print(f"Error getting agent statuses: {str(e)}")
             # Continue without agent statuses rather than failing completely
 
-                  # Prepare the response
+        # Prepare the response
         wallboard_data = {
             "CallsHandled": calls_handled,
             "CallsInQueue": calls_in_queue,
             "CallsAbandoned": calls_abandoned,
             "LongestWaitTime": longest_wait_time,
             "AgentStatuses": agent_statuses,
+            "Users": users,
             "AgentAnswerRate": agent_answer_rate,
             "AverageContactDuration": avg_contact_duration,
             "CustomInformation": custom_information,
@@ -216,40 +236,11 @@ def get_cors_headers():
         'Access-Control-Allow-Credentials': 'false'
     }
 
-def extract_queue_ids_from_arns(queue_arns_str):
-    """Extract queue IDs from comma-delimited ARN list"""
-    if not queue_arns_str:
-        return []
-    
-    queue_ids = []
-    arns = queue_arns_str.split(',')
-    
-    for arn in arns:
-        arn = arn.strip()
-        if arn:
-            queue_id = extract_queue_id_from_arn(arn)
-            if queue_id:
-                queue_ids.append(queue_id)
-            else:
-                print(f"Warning: Could not extract queue ID from ARN: {arn}")
-    
-    return queue_ids
-
 def extract_queue_id_from_arn(queue_arn):
-    """Extract queue ID from a single queue ARN"""
+    """Extract queue ID from queue ARN"""
     if queue_arn:
         # ARN format: arn:aws:connect:region:account:instance/instance-id/queue/queue-id
         return queue_arn.split('/')[-1]
-    return None
-
-def extract_instance_arn_from_queue_arn(queue_arn):
-    """Extract instance ARN from queue ARN"""
-    if queue_arn:
-        # Queue ARN: arn:aws:connect:region:account:instance/instance-id/queue/queue-id
-        # Instance ARN: arn:aws:connect:region:account:instance/instance-id
-        parts = queue_arn.split('/queue/')
-        if len(parts) > 0:
-            return parts[0]  # This gives us the instance ARN
     return None
 
 def extract_instance_arn_from_queue_arn(queue_arn):

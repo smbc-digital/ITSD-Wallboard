@@ -1,10 +1,22 @@
-const updateInterval = 10;
+const API_CONFIG = {
+    endpoint: localStorage.getItem('apiEndpoint') || 'https://uuqounhnz2.execute-api.eu-west-2.amazonaws.com/Prod/wallboard',
+    timeout: 10000
+};
+const DEBUG_MODE = false;
+const updateInterval = 8000;
+const callAlertThreshold = 10;
+const callWarnThreshold = 5;
+const waitTimeAlertThreshold = 300000; // 5 minutes in milliseconds
+const abandonmentAlertThreshold = 10;
+const alertStyle = 'alert';
+const warnStyle = 'warn';
+
 let timeLeft = updateInterval;
 let countdownTimer;
 
 function updateWallboard() {
     console.log('Fetching data...');
-    fetch('https://xxxuuqounhnz2.execute-api.eu-west-2.amazonaws.com/Prod/wallboard', {
+    fetch(API_CONFIG.endpoint, {
         method: 'GET',
         mode: 'cors',
         headers: {
@@ -18,41 +30,63 @@ function updateWallboard() {
             return response.json();
         })
         .then(data => {
-            console.log(data);
             const wallboardData = data;
-            document.getElementById('callsHandled').textContent = wallboardData.CallsHandled;
-            document.getElementById('callsInQueue').textContent = wallboardData.CallsInQueue;
-            document.getElementById('callsAbandoned').textContent = wallboardData.CallsAbandoned;
-            document.getElementById('longestWaitTime').textContent = formatTime(wallboardData.LongestWaitTime);
-            document.getElementById('agentAnswerRate').textContent = formatPercentage(wallboardData.AgentAnswerRate);
-            document.getElementById('averageContactDuration').textContent = formatDuration(wallboardData.AverageContactDuration);
+
+            safeUpdateElement('callsHandled', wallboardData.CallsHandled);
+            safeUpdateElement('callsInQueue', wallboardData.CallsInQueue);
+            safeUpdateElement('callsAbandoned', wallboardData.CallsAbandoned);
+            safeUpdateElement('longestWaitTime', formatTime(wallboardData.LongestWaitTime));
+            safeUpdateElement('agentAnswerRate', formatPercentage(wallboardData.AgentAnswerRate));
+            safeUpdateElement('averageContactDuration', formatDuration(wallboardData.AverageContactDuration));
+
+            if (DEBUG_MODE) {
+                wallboardData.CallsInQueue = 11;
+            }
+
+            if (wallboardData.CallsInQueue >= callAlertThreshold) {
+                document.getElementById('callsInQueueContainer').classList.add(alertStyle);
+            }
+            else {
+                document.getElementById('callsInQueueContainer').classList.remove(alertStyle);
+
+                if (wallboardData.CallsInQueue >= callWarnThreshold) {
+                    document.getElementById('callsInQueueContainer').classList.add(warnStyle);
+                }
+                else {
+                    document.getElementById('callsInQueueContainer').classList.remove(warnStyle);
+                }
+            }
 
             const customInfoElement = document.getElementById('customInformation');
-            if (wallboardData.CustomInformation) {
+            if (wallboardData.CustomInformation != 'No custom information available.') {
                 customInfoElement.textContent = wallboardData.CustomInformation;
                 customInfoElement.style.display = 'block';
             } else {
                 customInfoElement.style.display = 'none';
             }
+            
+            const agentList = document.getElementById('agent-status-list');
+            agentList.innerHTML = '';
 
-            const agentStatusesList = document.getElementById('agentStatuses');
-            agentStatusesList.innerHTML = '';
+            for (const agent of wallboardData.Users) {
+                var agentName = agent.FirstName + ' ' + agent.LastName;
+                var agentBadge  = '<span class="agent-status-badge ' + agent.Status + '">' + agent.Status +'</span>'
+                var agentNameBadge  = '<span class="agent-name-badge">'  + agent.FirstName.charAt(0) + agent.LastName.charAt(0) +'</span>'
+                var agentCallStatus = agent.OnContacts ? 'On-Call' : 'Free';
+                var agentCallBadge = '<span class="agent-status-badge ' + agentCallStatus + '">' + agentCallStatus +'</span>'
+                agentList.innerHTML = agentList.innerHTML + '<div class="agent-status"><div>'+ agentNameBadge + agentName +'</div><div>'+ agentBadge +'</div><div>'+ agentCallBadge +'</div></div>';
+            }
 
-            const statusCounts = wallboardData.AgentStatuses.reduce((acc, status) => {
-                acc[status] = (acc[status] || 0) + 1;
-                return acc;
-            }, {});
-
-            for (const [status, count] of Object.entries(statusCounts)) {
-                const li = document.createElement('li');
-                li.innerHTML = '<span class="agent-count">' + count + '</span>' + status;
-                agentStatusesList.appendChild(li);
+            if (wallboardData.Users.length === 0) {
+                document.getElementById('no-agent-message').style.display = 'block';
             }
 
             timeLeft = updateInterval;
             updateCountdown();
         })
         .catch(error => console.error('Error fetching data:', error));
+
+        startCountdown();
 }
 
 function formatTime(milliseconds) {
@@ -95,5 +129,18 @@ function updateCountdown() {
     }
 }
 
+function startCountdown() {
+    if (countdownTimer) clearInterval(countdownTimer);
+    countdownTimer = setInterval(updateCountdown, 1000);
+}
+
+function safeUpdateElement(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        element.textContent = value;
+    } else {
+        console.warn(`Element with ID '${elementId}' not found`);
+    }
+}
+
 updateWallboard();
-countdownTimer = setInterval(updateCountdown, 1000);

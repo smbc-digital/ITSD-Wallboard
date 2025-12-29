@@ -1,8 +1,9 @@
+/* ANIMATIONS ===================== */
+
 @keyframes fadeIn {
     from {
         opacity: 0;
     }
-
     to {
         opacity: 1;
     }
@@ -13,7 +14,6 @@
         transform: translateY(-20px);
         opacity: 0;
     }
-
     to {
         transform: translateY(0);
         opacity: 1;
@@ -21,18 +21,15 @@
 }
 
 @keyframes pulse {
-    0% {
+    0%, 100% {
         transform: scale(1);
     }
-
     50% {
         transform: scale(1.05);
     }
-
-    100% {
-        transform: scale(1);
-    }
 }
+
+/* BASE STYLES ===================== */
 
 body {
     font-family: Arial, sans-serif;
@@ -42,31 +39,55 @@ body {
     animation: fadeIn 1s ease-out;
 }
 
+h1 {
+    color: white;
+    font-size: 3em;
+    margin: 0;
+}
+
+h2 {
+    margin-top: 0;
+    font-size: 24px;
+    color: #333;
+}
+
+/* HEADER ===================== */
+
+
 .header {
     color: white;
-    text-align: left;
     margin-bottom: 30px;
     animation: slideIn 1s ease-out;
 }
 
-h1 {
-    color: white;
-    font-size: 3em;
+/* LAYOUT CONTAINERS  ===================== */
+
+.wallboard-container {
+    width: 60%;
+    float: left;
 }
 
-.creator {
-    color: #666;
-    font-style: italic;
-    margin-top: 0;
+.agent-status-container {
+    width: 39%;
+    float: right;
+    margin-top: -51px;
 }
+
+.clearfix {
+    clear: both;
+}
+
+/* WALLBOARD GRID  ===================== */
 
 .wallboard {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
     max-width: 100%;
     margin: 0 auto;
 }
+
+/* METRICS ===================== */
 
 .metric {
     background-color: #ffffff;
@@ -77,42 +98,65 @@ h1 {
     animation: slideIn 1s ease-out;
 }
 
+.metric.clear-background {
+    background-color: transparent;
+}
+
 .metric:hover {
     transform: translateY(-5px);
 }
 
-.metric h2 {
-    margin-top: 0;
+.metric p {
+    font-size: 72px;
+    font-weight: bold;
+    margin: 10px 0;
     color: #333;
 }
 
-.metric p {
-    font-size: 36px;
-    font-weight: bold;
-    margin: 10px 0;
-    color: #007bff;
+.metric--highlight {
+    font-size: 144px;
+    color: black;
 }
 
-.metric--highlight {
+.metric--highlight h2 {
+    font-size: 36px;
+    margin-bottom: 10px;
+}
+
+.metric--highlight p {
+    font-size: 144px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.metric--highlight.alert {
     background-color: #b32384;
     color: white;
 }
 
-.metric--highlight h2 {
-    margin-top: 0;
+.metric--highlight.warn {
+    background-color: #d67b1c;
     color: white;
 }
 
-.metric--highlight p {
-    font-size: 72px;
-    font-weight: bold;
-    margin: 10px 0;
+/* CUSTOM INFO ===================== */
+
+.custom-info {
+    grid-column: 1 / -1;
+    background-color: teal;
     color: white;
+    padding: 30px;
+    border-radius: 5px;
+    font-size: 36px;
     font-weight: bold;
+    text-align: center;
+    display: none;
 }
+
+/* AGENT STATUSES ===================== */
 
 .agent-statuses {
-    grid-column: 1 / -1;
+    color: white;
 }
 
 .agent-statuses ul {
@@ -137,21 +181,75 @@ h1 {
     margin-right: 5px;
 }
 
+.agent-status {
+    display: grid;
+    grid-template-columns: 50% 25% 25%;
+    background-color: teal;
+    color: white;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.agent-status-header {
+    display: grid;
+    grid-template-columns: 50% 25% 25%;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+}
+
+/* AGENT BADGES ===================== */
+
+.agent-name-badge {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: #066;
+    color: white;
+    font-weight: bold;
+    padding: 15px;
+    margin-right: 20px;
+    line-height: 50px;
+    text-align: center;
+}
+
+.agent-status-badge {
+    display: inline-block;
+    color: #ffffff;
+    padding: 5px 15px;
+    border-radius: 5px;
+    margin: 10px;
+    background-color: #dc3545; /* default red */
+}
+
+.agent-status-badge.Available {
+    background-color: #28a745;
+}
+
+.agent-status-badge.On-Call {
+    background-color: #ffc107;
+}
+
+.agent-status-badge.Free {
+    background-color: #007bff;
+}
+
+#o-agent-message {
+    display: none;
+}
+
+/* COUNTDOWN ===================== */
+
 #countdown {
     text-align: center;
     font-size: 14px;
-    color: #666;
-    margin-top: 20px;
+    color: white;
+    margin-top: 1em;
     animation: fadeIn 1s ease-out;
 }
 
-.custom-info {
-    grid-column: 1 / -1;
-    background-color: teal;
-    color: white;
-    padding: 30px;
-    border-radius: 5px;
-    font-size: 36px;
-    font-weight: bold;
-    text-align: center;
-}

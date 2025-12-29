@@ -12,41 +12,64 @@
     <div class="header">
         <h1>SMBC IT Service Desk</h1>
     </div>
-    <div class="wallboard">
-        <div class="custom-info" id="customInformation">
-        </div>
-        <div class="metric metric--highlight">
-            <h2>Calls in Queue</h2>
-            <p id="callsInQueue">-</p>
-        </div>
-        <div class="metric metric--highlight">
-            <h2>Calls Abandoned</h2>
-            <p id="callsAbandoned">-</p>
-        </div>
-        <div class="metric metric--highlight">
-            <h2>Longest Wait Time</h2>
-            <p id="longestWaitTime">-</p>
-        </div>
-        <div class="metric">
-            <h2>Calls Handled</h2>
-            <p id="callsHandled">-</p>
-        </div>
 
-        <div class="metric">
-            <h2>Overall Agent Answer Rate</h2>
-            <p id="agentAnswerRate">-</p>
-        </div>
-        <div class="metric">
-            <h2>Average Contact Duration</h2>
-            <p id="averageContactDuration">-</p>
-        </div>
-        <div class="metric agent-statuses">
-            <h2>Agent Statuses</h2>
-            <ul id="agentStatuses"></ul>
+    <div class="wallboard-container">
+        <div class="custom-info" id="customInformation"></div>
+
+        <div class="wallboard">
+            <div id="callsInQueueContainer" class="metric metric--highlight" role="region" aria-label="Calls in Queue">
+                <h2>Calls in Queue</h2>
+                <p id="callsInQueue" aria-live="polite" aria-atomic="true">-</p>
+            </div>
+            <div id="callsAbandonedContainer" class="metric metric--highlight" role="region"
+                aria-label="Calls Abandoned">
+                <h2>Calls Abandoned</h2>
+                <p id="callsAbandoned" aria-live="polite" aria-atomic="true">-</p>
+            </div>
+            <div id="longestWaitTimeContainer" class="metric" role="region" aria-label="Current Longest Wait">
+                <h2>Current Longest Wait</h2>
+                <p id="longestWaitTime" aria-live="polite" aria-atomic="true">-</p>
+            </div>
+            <div class="metric" role="region" aria-label="Calls Handled">
+                <h2>Calls Handled</h2>
+                <p id="callsHandled" aria-live="polite" aria-atomic="true">-</p>
+            </div>
+            <div class="metric" role="region" aria-label="Overall Agent Answer Rate">
+                <h2>Overall Agent Answer Rate</h2>
+                <p id="agentAnswerRate" aria-live="polite" aria-atomic="true">-</p>
+            </div>
+            <div class="metric" role="region" aria-label="Average Contact Duration">
+                <h2>Average Contact Duration</h2>
+                <p id="averageContactDuration" aria-live="polite" aria-atomic="true">-</p>
+            </div>
         </div>
     </div>
+
+    <div class="agent-status-container">
+        <div class="clear-background agent-statuses">
+            <div class="agent-status-header">
+                <div>Agent</div>
+                <div>Status</div>
+                <div>On Call?</div>
+            </div>
+            <div id="agent-status-list">
+                <div class="agent-status">
+                    <div>Ed</div>
+                    <div>At Lunch</div>
+                    <div>Free</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="no-agent-message" class="agent-status-header">
+            No agents available
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
     <div id="countdown"></div>
 
     <script src="wallboard.js"></script>
 </body>
+
 </html>
