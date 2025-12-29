@@ -143,9 +143,7 @@ def lambda_handler(event, context):
 
         # Get the agent statuses
         agent_statuses = []
-        contacts = []
-        
-
+        users = []
         try:
             response = connect.get_current_user_data(
                 InstanceId=instance_id,
@@ -154,13 +152,28 @@ def lambda_handler(event, context):
                 },
                 MaxResults=100
             )
-            # https://docs.aws.amazon.com/connect/latest/APIReference/API_GetCurrentUserData.html
+
             print("Current User Data:", response)
             
-            for user in response.get("UserDataList", []):
-                status = user.get("Status", {}).get("StatusName")
-                if status:
-                    agent_statuses.append(status)
+            for userData in response.get("UserDataList", []):
+                user = userData.get("User", {})
+                userResponse = connect.describe_user(
+                    InstanceId=instance_id,
+                    UserId=user.get("Id", "")
+                )
+
+                userStatus = userData.get("Status", {}).get("StatusName")
+                users.append({
+                    "Arn": user.get("Arn", ""),
+                    "Id": user.get("Id", ""),
+                    "OnContacts": len(user.get("Contacts", [])) > 0,
+                    "Status": userStatus,
+                    "FirstName": userResponse.get("User", {}).get("IdentityInfo").get("FirstName", ""),
+                    "LastName": userResponse.get("User", {}).get("IdentityInfo").get("LastName", "")
+                })
+                
+                if userStatus:
+                    agent_statuses.append(userStatus)
                     
         except Exception as e:
             print(f"Error getting agent statuses: {str(e)}")
@@ -173,6 +186,7 @@ def lambda_handler(event, context):
             "CallsAbandoned": calls_abandoned,
             "LongestWaitTime": longest_wait_time,
             "AgentStatuses": agent_statuses,
+            "Users": users,
             "AgentAnswerRate": agent_answer_rate,
             "AverageContactDuration": avg_contact_duration,
             "CustomInformation": custom_information,

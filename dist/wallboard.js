@@ -38,6 +38,13 @@ function updateWallboard() {
             safeUpdateElement('longestWaitTime', formatTime(wallboardData.LongestWaitTime));
             safeUpdateElement('agentAnswerRate', formatPercentage(wallboardData.AgentAnswerRate));
             safeUpdateElement('averageContactDuration', formatDuration(wallboardData.AverageContactDuration));
+            safeUpdateElement('loggedInAgents', wallboardData.AgentsOnline);
+            safeUpdateElement('loggedInAgents', wallboardData.AgentsOnline);
+            
+            let availableAgents = wallboardData.Users.filter(agent => agent.Status === 'Available').length;
+            safeUpdateElement('availableAgents', availableAgents);
+
+            loggedInAgents
 
             if (DEBUG_MODE) {
                 wallboardData.CallsInQueue = 11;
@@ -77,7 +84,10 @@ function updateWallboard() {
                 agentList.innerHTML = agentList.innerHTML + '<div class="agent-status"><div>'+ agentNameBadge + agentName +'</div><div>'+ agentBadge +'</div><div>'+ agentCallBadge +'</div></div>';
             }
 
-            if (wallboardData.Users.length === 0) {
+            if (wallboardData.Users.length > 0) {
+                document.getElementById('no-agent-message').style.display = 'none';
+            }
+            else {
                 document.getElementById('no-agent-message').style.display = 'block';
             }
 
