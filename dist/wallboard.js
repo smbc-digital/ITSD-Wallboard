@@ -32,6 +32,10 @@ function updateWallboard() {
         .then(data => {
             const wallboardData = data;
 
+            if (DEBUG_MODE) {
+                wallboardData.CallsInQueue = 6;
+            }
+
             safeUpdateElement('callsHandled', wallboardData.CallsHandled);
             safeUpdateElement('callsInQueue', wallboardData.CallsInQueue);
             safeUpdateElement('callsAbandoned', wallboardData.CallsAbandoned);
@@ -43,12 +47,6 @@ function updateWallboard() {
             
             let availableAgents = wallboardData.Users.filter(agent => agent.Status === 'Available').length;
             safeUpdateElement('availableAgents', availableAgents);
-
-            loggedInAgents
-
-            if (DEBUG_MODE) {
-                wallboardData.CallsInQueue = 11;
-            }
 
             if (wallboardData.CallsInQueue >= callAlertThreshold) {
                 document.getElementById('callsInQueueContainer').classList.add(alertStyle);

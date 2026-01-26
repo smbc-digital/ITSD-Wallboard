@@ -129,13 +129,15 @@ h2 {
     margin: 10px 0;
 }
 
-.metric--highlight.alert {
+.metric.alert {
     background-color: #b32384;
-    color: white;
 }
 
-.metric--highlight.warn {
+.metric.warn {
     background-color: #d67b1c;
+}
+
+.metric.alert p, .metric.warn p, .metric.alert h2, .metric.warn h2 {
     color: white;
 }
 
